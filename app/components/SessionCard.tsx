@@ -100,7 +100,7 @@ export default function SessionCard({
               </p>
               <div className="flex flex-col gap-0 text-xs sm:text-sm">
                 {/* Company details */}
-                <div className="flex flex-wrap gap-2 sm:gap-3 text-gray-500 dark:text-dark-text-muted">
+                <div className="flex flex-wrap gap-2 sm:gap-3 text-gray-500 dark:text-dark-text-muted pr-2">
                   {session.companies && (
                     <div className="flex items-center gap-1">
                       <CompanyIcon />
@@ -159,17 +159,17 @@ export default function SessionCard({
         {/* Additional info tags */}
         <div className="flex flex-row gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide">
           {session.level && (
-            <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full border border-purple-200 dark:border-purple-700 whitespace-nowrap">
+            <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-[9.9px] font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-full border border-purple-200 dark:border-purple-700 whitespace-nowrap">
               {session.level}
             </span>
           )}
           {session.scope && (
-            <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full border border-green-200 dark:border-green-700 whitespace-nowrap">
+            <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-[9.9px] font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full border border-green-200 dark:border-green-700 whitespace-nowrap">
               {session.scope}
             </span>
           )}
           {session.assignedTrack && (
-            <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full border border-blue-200 dark:border-blue-700 whitespace-nowrap">
+            <span className="px-1.5 py-0.5 sm:px-2 sm:py-1 text-[9.9px] font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full border border-blue-200 dark:border-blue-700 whitespace-nowrap">
               {session.assignedTrack}
             </span>
           )}

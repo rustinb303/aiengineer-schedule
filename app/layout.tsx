@@ -12,13 +12,67 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://worlds-fair-schedule.agpallav.com/"),
   title: "AI Engineer World's Fair 2025 - Schedule",
-  description:
-    "Browse and bookmark sessions for the AI Engineer World's Fair 2025 in San Francisco",
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
+  description: "Browse sessions for the 2025 AI Engineer World's Fair.",
+  keywords: [
+    "AI Engineer",
+    "World's Fair",
+    "2025",
+    "Conference",
+    "Schedule",
+    "San Francisco",
+    "AI",
+    "Engineering",
+  ],
+  authors: [{ name: "AI Engineer World's Fair" }],
+  creator: "@pallavmac",
+
+  // Open Graph metadata
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://worlds-fair-schedule.agpallav.com/",
+    siteName: "AI Engineer World's Fair 2025",
+    title: "AI Engineer World's Fair 2025 - Schedule",
+    description: "Browse sessions for the 2025 AI Engineer World's Fair.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "AI Engineer World's Fair 2025",
+      },
+    ],
+  },
+
+  // Twitter metadata
+  twitter: {
+    card: "summary_large_image",
+    title: "AI Engineer World's Fair 2025 - Schedule",
+    description: "Browse sessions for the 2025 AI Engineer World's Fair.",
+    images: ["/twitter-image.png"],
+    creator: "@pallavmac",
+    site: "@pallavmac",
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+
+  // Icons
+  icons: {
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
 };
 
