@@ -2,7 +2,7 @@
 
 A modern, responsive web application for browsing and managing your personal schedule for the 2025 [AI Engineer](https://www.ai.engineer/) World's Fair in San Francisco.
 
-Pulls the data from 
+Pulls the data live from the [raw json](https://sessionize.com/api/v2/w3hd2z8a/view/All) and [schedule json](https://www.ai.engineer/sessions-speakers-details.json).
 
 ## ✨ Features
 

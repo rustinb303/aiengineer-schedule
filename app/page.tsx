@@ -16,9 +16,8 @@ import FilterBar from "./components/FilterBar";
 import { ScheduleData, SessionMoreInfo, Session } from "./types/schedule";
 import { useBookmarksAndStarsContext } from "./contexts/BookmarksAndStarsContext";
 import { getSessionDay } from "./utils/dateTime";
-import scheduleData from "../schedule.json";
-import scheduleMoreInfo from "../schedule-more-info.json";
 import { SpeakerIcon, TalkIcon } from "./utils/svgs";
+import ScheduleDataService from "./utils/scheduleDataService";
 
 export default function Home() {
   const [data, setData] = useState<ScheduleData>({
@@ -36,6 +35,8 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<"list" | "calendar">("list");
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const {
     bookmarks: bookmarkedIds,
@@ -51,32 +52,48 @@ export default function Home() {
   } = useBookmarksAndStarsContext();
 
   useEffect(() => {
-    // Merge schedule data with additional info
-    const moreInfoMap = new Map<string, SessionMoreInfo>();
-    (scheduleMoreInfo as SessionMoreInfo[]).forEach((info) => {
-      moreInfoMap.set(info["Session ID"], info);
-    });
+    const loadScheduleData = async () => {
+      setIsLoading(true);
+      setLoadError(null);
 
-    const mergedSessions = (scheduleData as ScheduleData).sessions.map(
-      (session) => {
-        const moreInfo = moreInfoMap.get(session.id);
-        if (moreInfo) {
-          return {
-            ...session,
-            level: moreInfo.Level || undefined,
-            scope: moreInfo.Scope || undefined,
-            assignedTrack: moreInfo["Assigned Track"] || undefined,
-            companies: moreInfo.Companies || undefined,
-          };
-        }
-        return session;
+      try {
+        const scheduleService = ScheduleDataService.getInstance();
+        const { schedule, moreInfo } =
+          await scheduleService.fetchScheduleData();
+
+        // Merge schedule data with additional info
+        const moreInfoMap = new Map<string, SessionMoreInfo>();
+        (moreInfo as SessionMoreInfo[]).forEach((info) => {
+          moreInfoMap.set(info["Session ID"], info);
+        });
+
+        const mergedSessions = schedule.sessions.map((session) => {
+          const moreInfoData = moreInfoMap.get(session.id);
+          if (moreInfoData) {
+            return {
+              ...session,
+              level: moreInfoData.Level || undefined,
+              scope: moreInfoData.Scope || undefined,
+              assignedTrack: moreInfoData["Assigned Track"] || undefined,
+              companies: moreInfoData.Companies || undefined,
+            };
+          }
+          return session;
+        });
+
+        setData({
+          ...schedule,
+          sessions: mergedSessions,
+        });
+      } catch (error) {
+        console.error("Error loading schedule data:", error);
+        setLoadError("Failed to load schedule data. Please try again later.");
+      } finally {
+        setIsLoading(false);
       }
-    );
+    };
 
-    setData({
-      ...(scheduleData as ScheduleData),
-      sessions: mergedSessions,
-    });
+    loadScheduleData();
   }, []);
 
   // Get unique tracks from sessions
@@ -347,7 +364,29 @@ export default function Home() {
         </div>
       </header>
 
-      {mainView === "talks" ? (
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-gray-100 mx-auto"></div>
+            <p className="mt-4 text-gray-600 dark:text-dark-text-secondary">
+              Fetching schedule...
+            </p>
+          </div>
+        </div>
+      ) : loadError ? (
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center max-w-md">
+            <p className="text-red-600 dark:text-red-400 mb-2">{loadError}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 text-sm bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200 rounded-lg transition-all duration-200"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      ) : mainView === "talks" ? (
         <>
           {/* Filter Bar */}
           <FilterBar
