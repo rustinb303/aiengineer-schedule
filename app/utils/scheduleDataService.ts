@@ -191,7 +191,5 @@ function jsonCleanupSchedule(jsonText: string): string {
 }
 
 function jsonCleanupScheduleMoreInfo(jsonText: string): string {
-  return jsonText
-    .replaceAll("N/A", "")
-    .replaceAll("Contextual AI, Contextual AI", "Contextual AI");
+  return jsonText.replaceAll("N/A", "");
 }

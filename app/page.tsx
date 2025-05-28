@@ -37,6 +37,7 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isCompactView, setIsCompactView] = useState(false);
 
   const {
     bookmarks: bookmarkedIds,
@@ -534,8 +535,41 @@ export default function Home() {
                   </div>
                 )}
 
+                {/* Compact Toggle */}
+                <div className="flex items-center gap-2 mb-4">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <span className="text-sm font-medium text-gray-700 dark:text-dark-text-primary/60">
+                      Compact
+                    </span>
+                    <button
+                      onClick={() => setIsCompactView(!isCompactView)}
+                      className={`relative w-11 h-6 rounded-full transition-colors duration-300 ${
+                        isCompactView
+                          ? "bg-gray-900 dark:bg-gray-400"
+                          : "bg-gray-300 dark:bg-dark-hover"
+                      }`}
+                      role="switch"
+                      aria-checked={isCompactView}
+                    >
+                      <span
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-lg transition-transform duration-300 ${
+                          isCompactView
+                            ? "translate-x-5 dark:bg-black/90"
+                            : "translate-x-0 dark:bg-black/90"
+                        }`}
+                      />
+                    </button>
+                  </label>
+                </div>
+
                 {/* Session Cards */}
-                <div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                <div
+                  className={`grid gap-3 sm:gap-4 ${
+                    isCompactView
+                      ? "grid-cols-1"
+                      : "grid-cols-1 md:grid-cols-2 xl:grid-cols-3"
+                  }`}
+                >
                   {filteredSessions.map((session) => {
                     const speaker = data.speakers.find((s) =>
                       session.speakers.includes(s.id)
@@ -552,6 +586,7 @@ export default function Home() {
                         onClick={() => handleSessionClick(session)}
                         isBookmarked={bookmarkedIds.includes(session.id)}
                         isStarred={starredIds.includes(session.id)}
+                        isCompactView={isCompactView}
                         onBookmarkToggle={async () => {
                           if (isBookmarked(session.id)) {
                             await removeBookmark(session.id);

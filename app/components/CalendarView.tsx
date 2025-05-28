@@ -192,7 +192,7 @@ export default function CalendarView({
                   </div>
 
                   {/* Sessions positioned absolutely */}
-                  <div className="absolute inset-0 px-1">
+                  <div className="absolute inset-[1px] px-1">
                     {filteredSessions
                       .filter((session) => session.roomId === room.id)
                       .map((session) => {

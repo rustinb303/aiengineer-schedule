@@ -11,6 +11,7 @@ interface SessionCardProps {
   onClick?: () => void;
   isBookmarked?: boolean;
   isStarred?: boolean;
+  isCompactView?: boolean;
   onBookmarkToggle?: () => void;
   onStarToggle?: () => void;
 }
@@ -22,6 +23,7 @@ export default function SessionCard({
   onClick,
   isBookmarked = false,
   isStarred = false,
+  isCompactView = false,
   onBookmarkToggle,
   onStarToggle,
 }: SessionCardProps) {
@@ -46,6 +48,90 @@ export default function SessionCard({
   };
 
   const duration = getDuration(session.startsAt, session.endsAt);
+
+  if (isCompactView) {
+    return (
+      <div
+        className="bg-white dark:bg-dark-card border-[1.5px] border-gray-200 dark:border-dark-border rounded-xl p-3 sm:p-4 shadow-card dark:shadow-dark-card hover:shadow-card-hover dark:hover:shadow-dark-card-hover transition-all duration-200 cursor-pointer"
+        onClick={onClick}
+      >
+        <div className="flex items-center justify-between gap-4">
+          {/* Left side - Time and Title */}
+          <div className="flex-1 min-w-0">
+            {/* Title */}
+            <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-dark-text-primary">
+              {session.title}
+            </h3>
+            {/* Speaker info */}
+            {speaker && (
+              <div className="flex items-center gap-2 mt-[2px]">
+                <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-text-secondary">
+                  {speaker.fullName}
+                  {session.companies && (
+                    <span className="text-gray-500 dark:text-dark-text-muted">
+                      {" • "}
+                      {session.companies.split(",")[0]}
+                    </span>
+                  )}
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2 mt-2">
+              {/* Date and time badges */}
+              <span className="px-2 py-0.5 text-[10px] sm:text-xs font-medium bg-gray-100 dark:bg-gray-300/10 text-gray-700 dark:text-dark-text-secondary rounded-md border border-gray-200 dark:border-dark-border whitespace-nowrap">
+                {formatDate(session.startsAt)}
+              </span>
+              <span className="px-2 py-0.5 text-[10px] sm:text-xs font-medium bg-gray-100 dark:bg-gray-300/10 text-gray-700 dark:text-dark-text-secondary rounded-md border border-gray-200 dark:border-dark-border whitespace-nowrap">
+                {formatTime(session.startsAt)} - {formatTime(session.endsAt)}
+              </span>
+              <span className="px-2 py-0.5 text-[10px] sm:text-xs font-medium bg-gray-100 dark:bg-gray-300/10 text-gray-700 dark:text-dark-text-secondary rounded-md border border-gray-200 dark:border-dark-border whitespace-nowrap">
+                {duration} min
+              </span>
+            </div>
+          </div>
+
+          {/* Right side - Actions */}
+          <div className="flex flex-col gap-[6px] sm:gap-2 flex-shrink-0">
+            <button
+              onClick={(e) => toggleBookmark(e)}
+              className={`px-1.5 py-1.5 sm:px-2.5 sm:py-1.5 rounded-lg transition-all duration-200 shadow-subtle border-[1.5px] ${
+                isBookmarked
+                  ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/40 border-blue-200 dark:border-blue-700"
+                  : "bg-gray-100 dark:bg-gray-400/10 text-gray-400 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border-gray-200 dark:border-white/10"
+              }`}
+              aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+            >
+              <svg
+                className="w-4 h-3.5 sm:w-4 sm:h-4"
+                fill={isBookmarked ? "currentColor" : "none"}
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={(e) => toggleStar(e)}
+              className={`px-1.5 py-1.5 sm:px-2 sm:py-1 rounded-lg transition-all duration-200 shadow-subtle border-[1.5px] ${
+                isStarred
+                  ? "bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/40 border-green-200 dark:border-green-700"
+                  : "bg-gray-100 dark:bg-gray-400/10 text-gray-400 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border-gray-200 dark:border-white/10"
+              }`}
+              aria-label={isStarred ? "Not going" : "Mark as going"}
+            >
+              <StarIcon />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -105,7 +191,7 @@ export default function SessionCard({
                     <div className="flex items-center gap-1">
                       <CompanyIcon />
                       <span className="text-xs sm:text-sm truncate">
-                        {session.companies}
+                        {session.companies.split(",")[0]}
                       </span>
                     </div>
                   )}
