@@ -4,10 +4,11 @@ import { useEffect } from "react";
 import { Session, Speaker, Room } from "../types/schedule";
 import { localStorageUtils } from "../utils/localStorage";
 import { formatTime, formatDate, getDuration } from "../utils/dateTime";
+import { getSessionTrack, requiresAILeadersPass } from "../utils/trackUtils";
 
 interface SessionDetailModalProps {
   session: Session | null;
-  speaker?: Speaker;
+  speakers?: Speaker[];
   room?: Room;
   isOpen: boolean;
   onClose: () => void;
@@ -19,7 +20,7 @@ interface SessionDetailModalProps {
 
 export default function SessionDetailModal({
   session,
-  speaker,
+  speakers,
   room,
   isOpen,
   onClose,
@@ -192,6 +193,24 @@ export default function SessionDetailModal({
             )}
           </div>
 
+          {/* AI Leaders Pass Disclaimer */}
+          {(() => {
+            const sessionTrack = getSessionTrack(
+              session.assignedTrack,
+              room?.name
+            );
+            return (
+              requiresAILeadersPass(sessionTrack) && (
+                <div className="mb-4 sm:mb-6 bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-400 dark:border-purple-600 text-purple-700 dark:text-purple-400 p-3 rounded-lg">
+                  <p className="text-xs sm:text-sm font-medium">
+                    Note: This session is part of a track available for those
+                    with the <i>AI Leaders</i> pass
+                  </p>
+                </div>
+              )
+            );
+          })()}
+
           {/* Description */}
           <div className="mb-4 sm:mb-6">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
@@ -202,33 +221,37 @@ export default function SessionDetailModal({
             </p>
           </div>
 
-          {/* Speaker */}
-          {speaker && (
+          {/* Speakers */}
+          {speakers && speakers.length > 0 && (
             <div className="mb-4 sm:mb-6">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary mb-2 sm:mb-3">
-                Speaker
+                {speakers.length === 1 ? 'Speaker' : 'Speakers'}
               </h3>
-              <div className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 dark:bg-dark-hover rounded-lg border border-gray-100 dark:border-dark-border">
-                {speaker.profilePicture && (
-                  <img
-                    src={speaker.profilePicture}
-                    alt={speaker.fullName}
-                    className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover flex-shrink-0"
-                  />
-                )}
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-gray-900 dark:text-dark-text-primary text-sm sm:text-base">
-                    {speaker.fullName}
-                  </h4>
-                  <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-text-secondary mb-1 sm:mb-2">
-                    {speaker.tagLine}
-                  </p>
-                  {speaker.bio && (
-                    <p className="text-xs sm:text-sm text-gray-500 dark:text-dark-text-muted">
-                      {speaker.bio}
-                    </p>
-                  )}
-                </div>
+              <div className="space-y-3">
+                {speakers.map((speaker) => (
+                  <div key={speaker.id} className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 dark:bg-dark-hover rounded-lg border border-gray-100 dark:border-dark-border">
+                    {speaker.profilePicture && (
+                      <img
+                        src={speaker.profilePicture}
+                        alt={speaker.fullName}
+                        className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-gray-900 dark:text-dark-text-primary text-sm sm:text-base">
+                        {speaker.fullName}
+                      </h4>
+                      <p className="text-xs sm:text-sm text-gray-600 dark:text-dark-text-secondary mb-1 sm:mb-2">
+                        {speaker.tagLine}
+                      </p>
+                      {speaker.bio && (
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-dark-text-muted">
+                          {speaker.bio}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}

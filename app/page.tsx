@@ -18,6 +18,11 @@ import { useBookmarksAndStarsContext } from "./contexts/BookmarksAndStarsContext
 import { getSessionDay } from "./utils/dateTime";
 import { EmailIcon, GithubIcon, SpeakerIcon, TalkIcon } from "./utils/svgs";
 import ScheduleDataService from "./utils/scheduleDataService";
+import {
+  getSessionTrack,
+  extractTrackFromAssigned,
+  requiresAILeadersPass,
+} from "./utils/trackUtils";
 
 export default function Home() {
   const [data, setData] = useState<ScheduleData>({
@@ -101,12 +106,17 @@ export default function Home() {
   const availableTracks = useMemo(() => {
     const tracks = new Set<string>();
     data.sessions.forEach((session) => {
-      if (session.assignedTrack && session.assignedTrack.trim()) {
-        tracks.add(session.assignedTrack);
+      // Get room name for this session
+      const room = data.rooms.find((r) => r.id === session.roomId);
+      const track = getSessionTrack(session.assignedTrack, room?.name);
+
+      if (track) {
+        // Store the cleaned track name (without parentheses)
+        tracks.add(track);
       }
     });
     return Array.from(tracks).sort();
-  }, [data.sessions]);
+  }, [data.sessions, data.rooms]);
 
   const filteredSessions = useMemo(() => {
     let filtered = data.sessions;
@@ -120,9 +130,14 @@ export default function Home() {
 
     // Filter by track
     if (selectedTrack) {
-      filtered = filtered.filter(
-        (session) => session.assignedTrack === selectedTrack
-      );
+      filtered = filtered.filter((session) => {
+        // Get room name for this session
+        const room = data.rooms.find((r) => r.id === session.roomId);
+        const sessionTrack = getSessionTrack(session.assignedTrack, room?.name);
+
+        // Compare the extracted track with the selected track
+        return sessionTrack === selectedTrack;
+      });
     }
 
     // Filter by bookmarked/starred
@@ -142,6 +157,7 @@ export default function Home() {
     );
   }, [
     data.sessions,
+    data.rooms,
     selectedDay,
     selectedTrack,
     showBookmarked,
@@ -535,6 +551,16 @@ export default function Home() {
                   </div>
                 )}
 
+                {/* Disclaimer for AI Leaders tracks */}
+                {selectedTrack && requiresAILeadersPass(selectedTrack) && (
+                  <div className="bg-purple-50 dark:bg-purple-900/20 border-l-4 border-purple-400 dark:border-purple-600 text-purple-700 dark:text-purple-400 p-3 mb-4 rounded-lg max-w-xl shadow-subtle dark:shadow-dark-subtle">
+                    <p className="font-medium text-sm">
+                      Note: This track is available for those with the{" "}
+                      <i>AI Leaders</i> pass
+                    </p>
+                  </div>
+                )}
+
                 {/* Compact Toggle */}
                 <div className="flex items-center gap-2 mb-4">
                   <label className="flex items-center gap-2 cursor-pointer">
@@ -614,6 +640,7 @@ export default function Home() {
         <SpeakersView
           speakers={data.speakers}
           sessions={data.sessions}
+          rooms={data.rooms}
           selectedTrack={selectedTrack}
           onSessionClick={handleSessionClick}
         />
@@ -622,9 +649,9 @@ export default function Home() {
       {/* Session Detail Modal */}
       <SessionDetailModal
         session={selectedSession}
-        speaker={
+        speakers={
           selectedSession
-            ? data.speakers.find((s) => selectedSession.speakers.includes(s.id))
+            ? data.speakers.filter((s) => selectedSession.speakers.includes(s.id))
             : undefined
         }
         room={

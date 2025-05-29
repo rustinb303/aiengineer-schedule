@@ -1,12 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
-import { Speaker, Session } from "../types/schedule";
+import { Speaker, Session, Room } from "../types/schedule";
 import SpeakerCard from "./SpeakerCard";
+import { getSessionTrack } from "../utils/trackUtils";
 
 interface SpeakersViewProps {
   speakers: Speaker[];
   sessions: Session[];
+  rooms: Room[];
   selectedTrack: string;
   onSessionClick?: (session: Session) => void;
 }
@@ -14,6 +16,7 @@ interface SpeakersViewProps {
 export default function SpeakersView({
   speakers,
   sessions,
+  rooms,
   selectedTrack,
   onSessionClick,
 }: SpeakersViewProps) {
@@ -26,7 +29,12 @@ export default function SpeakersView({
     // Get speakers who have sessions in the selected track
     const speakerIdsInTrack = new Set<string>();
     sessions.forEach((session) => {
-      if (session.assignedTrack === selectedTrack) {
+      // Get room name for this session
+      const room = rooms.find((r) => r.id === session.roomId);
+      const sessionTrack = getSessionTrack(session.assignedTrack, room?.name);
+      
+      // Check if this session matches the selected track
+      if (sessionTrack === selectedTrack) {
         session.speakers.forEach((speakerId) => {
           speakerIdsInTrack.add(speakerId);
         });
@@ -34,7 +42,7 @@ export default function SpeakersView({
     });
 
     return speakers.filter((speaker) => speakerIdsInTrack.has(speaker.id));
-  }, [speakers, sessions, selectedTrack]);
+  }, [speakers, sessions, rooms, selectedTrack]);
 
   return (
     <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
