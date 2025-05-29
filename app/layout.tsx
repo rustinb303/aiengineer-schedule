@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { FirebaseAuthProvider } from "./contexts/FirebaseAuthContext";
 import { BookmarksAndStarsProvider } from "./contexts/BookmarksAndStarsContext";
+import { Suspense } from "react";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 
@@ -87,7 +88,7 @@ export default function RootLayout({
         <body className="font-sans antialiased">
           <FirebaseAuthProvider>
             <BookmarksAndStarsProvider>
-              {children}
+              <Suspense fallback={null}>{children}</Suspense>
               <Analytics />
             </BookmarksAndStarsProvider>
           </FirebaseAuthProvider>

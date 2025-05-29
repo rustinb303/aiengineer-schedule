@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   SignInButton,
   SignUpButton,
@@ -25,6 +26,9 @@ import {
 } from "./utils/trackUtils";
 
 export default function Home() {
+  const [sessionIdFromUrl, setSessionIdFromUrl] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+
   const [data, setData] = useState<ScheduleData>({
     sessions: [],
     speakers: [],
@@ -102,6 +106,25 @@ export default function Home() {
     loadScheduleData();
   }, []);
 
+  // Get session ID from URL on client side
+  useEffect(() => {
+    const sessionId = searchParams?.get("session");
+    if (sessionId) {
+      setSessionIdFromUrl(sessionId);
+    }
+  }, [searchParams]);
+
+  // Open modal if session ID is in URL
+  useEffect(() => {
+    if (sessionIdFromUrl && data.sessions.length > 0 && !isLoading) {
+      const session = data.sessions.find((s) => s.id === sessionIdFromUrl);
+      if (session) {
+        setSelectedSession(session);
+        setIsModalOpen(true);
+      }
+    }
+  }, [sessionIdFromUrl, data.sessions, isLoading]);
+
   // Get unique tracks from sessions
   const availableTracks = useMemo(() => {
     const tracks = new Set<string>();
@@ -169,11 +192,25 @@ export default function Home() {
   const handleSessionClick = (session: Session) => {
     setSelectedSession(session);
     setIsModalOpen(true);
+
+    // Add session parameter to URL
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set("session", session.id);
+    window.history.pushState({}, "", newUrl.toString());
+    setSessionIdFromUrl(session.id);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedSession(null);
+
+    // Remove session parameter from URL
+    if (sessionIdFromUrl) {
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("session");
+      window.history.replaceState({}, "", newUrl.pathname);
+      setSessionIdFromUrl(null);
+    }
   };
 
   return (
@@ -651,7 +688,9 @@ export default function Home() {
         session={selectedSession}
         speakers={
           selectedSession
-            ? data.speakers.filter((s) => selectedSession.speakers.includes(s.id))
+            ? data.speakers.filter((s) =>
+                selectedSession.speakers.includes(s.id)
+              )
             : undefined
         }
         room={

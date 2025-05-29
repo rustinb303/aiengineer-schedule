@@ -5,6 +5,7 @@ import { Session, Speaker, Room } from "../types/schedule";
 import { localStorageUtils } from "../utils/localStorage";
 import { formatTime, formatDate, getDuration } from "../utils/dateTime";
 import { getSessionTrack, requiresAILeadersPass } from "../utils/trackUtils";
+import { ShareIcon } from "../utils/svgs";
 
 interface SessionDetailModalProps {
   session: Session | null;
@@ -68,6 +69,29 @@ export default function SessionDetailModal({
         localStorageUtils.addStarred(session.id);
       }
       onStarToggle?.();
+    }
+  };
+
+  const handleShare = async () => {
+    if (!session) return;
+
+    const shareUrl = `${window.location.origin}/?session=${session.id}`;
+
+    // Try to use native share API if available (mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: session.title,
+          text: `Check out this session at AI Engineer World's Fair 2025: ${session.title}`,
+          url: shareUrl,
+        });
+      } catch (err) {}
+    } else {
+      // Fallback to copying to clipboard
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        alert("Link copied to clipboard");
+      } catch (err) {}
     }
   };
 
@@ -225,11 +249,14 @@ export default function SessionDetailModal({
           {speakers && speakers.length > 0 && (
             <div className="mb-4 sm:mb-6">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary mb-2 sm:mb-3">
-                {speakers.length === 1 ? 'Speaker' : 'Speakers'}
+                {speakers.length === 1 ? "Speaker" : "Speakers"}
               </h3>
               <div className="space-y-3">
                 {speakers.map((speaker) => (
-                  <div key={speaker.id} className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 dark:bg-dark-hover rounded-lg border border-gray-100 dark:border-dark-border">
+                  <div
+                    key={speaker.id}
+                    className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 dark:bg-dark-hover rounded-lg border border-gray-100 dark:border-dark-border"
+                  >
                     {speaker.profilePicture && (
                       <img
                         src={speaker.profilePicture}
@@ -332,9 +359,17 @@ export default function SessionDetailModal({
                     d="M5 13l4 4L19 7"
                   />
                 </svg>
-                <span className="sm:inline">
+                <span className="hidden sm:inline">
                   {isStarred ? "Going" : "Mark as Going"}
                 </span>
+                <span className="sm:hidden">Going</span>
+              </button>
+              <button
+                onClick={handleShare}
+                className="flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 text-sm sm:text-base min-h-[44px] shadow-subtle dark:shadow-dark-subtle border-2 bg-gray-100 dark:bg-dark-option text-gray-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-option/50 border-gray-200 dark:border-white/20"
+              >
+                <ShareIcon />
+                <span>Share</span>
               </button>
             </div>
             <button
