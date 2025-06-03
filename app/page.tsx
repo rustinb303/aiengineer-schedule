@@ -14,6 +14,7 @@ import CalendarView from "./components/CalendarView";
 import SpeakersView from "./components/SpeakersView";
 import SessionDetailModal from "./components/SessionDetailModal";
 import FilterBar from "./components/FilterBar";
+import SearchOverlay from "./components/SearchOverlay";
 import { ScheduleData, SessionMoreInfo, Session } from "./types/schedule";
 import { useBookmarksAndStarsContext } from "./contexts/BookmarksAndStarsContext";
 import { getSessionDay } from "./utils/dateTime";
@@ -47,6 +48,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isCompactView, setIsCompactView] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const {
     bookmarks: bookmarkedIds,
@@ -598,8 +600,8 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* Compact Toggle */}
-                <div className="flex items-center gap-2 mb-4">
+                {/* Compact Toggle and Search Button */}
+                <div className="flex items-center justify-between mb-4">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <span className="text-sm font-medium text-gray-700 dark:text-dark-text-primary/60">
                       Compact
@@ -623,6 +625,26 @@ export default function Home() {
                       />
                     </button>
                   </label>
+
+                  <button
+                    onClick={() => setIsSearchOpen(true)}
+                    className="flex items-center gap-2 px-3 py-1 text-sm font-medium text-gray-700 dark:text-dark-text-secondary bg-gray-100 dark:bg-dark-hover hover:bg-gray-200 dark:hover:bg-dark-border rounded-full transition-colors border border-gray-200 dark:border-dark-border"
+                  >
+                    <svg
+                      className="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
+                    </svg>
+                    <span>Search</span>
+                  </button>
                 </div>
 
                 {/* Session Cards */}
@@ -650,6 +672,8 @@ export default function Home() {
                         isBookmarked={bookmarkedIds.includes(session.id)}
                         isStarred={starredIds.includes(session.id)}
                         isCompactView={isCompactView}
+                        showBookmarkedFilter={showBookmarked}
+                        showStarredFilter={showStarred}
                         onBookmarkToggle={async () => {
                           if (isBookmarked(session.id)) {
                             await removeBookmark(session.id);
@@ -724,6 +748,16 @@ export default function Home() {
             }
           }
         }}
+      />
+
+      {/* Search Overlay */}
+      <SearchOverlay
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        sessions={data.sessions}
+        speakers={data.speakers}
+        rooms={data.rooms}
+        onSessionClick={handleSessionClick}
       />
     </div>
   );

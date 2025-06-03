@@ -12,6 +12,8 @@ interface SessionCardProps {
   isBookmarked?: boolean;
   isStarred?: boolean;
   isCompactView?: boolean;
+  showBookmarkedFilter?: boolean;
+  showStarredFilter?: boolean;
   onBookmarkToggle?: () => void;
   onStarToggle?: () => void;
 }
@@ -24,6 +26,8 @@ export default function SessionCard({
   isBookmarked = false,
   isStarred = false,
   isCompactView = false,
+  showBookmarkedFilter = false,
+  showStarredFilter = false,
   onBookmarkToggle,
   onStarToggle,
 }: SessionCardProps) {
@@ -52,7 +56,11 @@ export default function SessionCard({
   if (isCompactView) {
     return (
       <div
-        className="bg-white dark:bg-dark-card border-[1.5px] border-gray-200 dark:border-dark-border rounded-xl p-3 sm:p-4 shadow-card dark:shadow-dark-card hover:shadow-card-hover dark:hover:shadow-dark-card-hover transition-all duration-200 cursor-pointer"
+        className={`${
+          session.isPlenumSession
+            ? "bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10"
+            : "bg-white dark:bg-dark-card"
+        } ${session.isPlenumSession ? "border-2 border-orange-400 dark:border-orange-500" : "border-[1.5px] border-gray-200 dark:border-dark-border"} rounded-xl p-3 sm:p-4 shadow-card dark:shadow-dark-card hover:shadow-card-hover dark:hover:shadow-dark-card-hover transition-all duration-200 cursor-pointer`}
         onClick={onClick}
       >
         <div className="flex items-center justify-between gap-4">
@@ -135,7 +143,11 @@ export default function SessionCard({
 
   return (
     <div
-      className="bg-white dark:bg-dark-card border-[1.5px] border-gray-200 dark:border-dark-border rounded-xl p-4 sm:p-6 shadow-card dark:shadow-dark-card hover:shadow-card-hover dark:hover:shadow-dark-card-hover transition-all duration-200 cursor-pointer flex flex-col h-full"
+      className={`${
+        session.isPlenumSession
+          ? "bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10"
+          : "bg-white dark:bg-dark-card"
+      } ${session.isPlenumSession ? "border-2 border-orange-400 dark:border-orange-500" : "border-[1.5px] border-gray-200 dark:border-dark-border"} rounded-xl p-4 sm:p-6 shadow-card dark:shadow-dark-card hover:shadow-card-hover dark:hover:shadow-dark-card-hover transition-all duration-200 cursor-pointer flex flex-col h-full`}
       onClick={onClick}
     >
       {/* Top section - fixed height content */}
@@ -161,6 +173,13 @@ export default function SessionCard({
         <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-1">
           {session.title}
         </h3>
+        {/* Show room name when bookmark or going filter is active */}
+        {(showBookmarkedFilter || showStarredFilter) && room && (
+          <p className="flex flex-row gap-1 items-center text-xs text-gray-500 dark:text-dark-text-muted mb-1">
+            <RoomIcon />
+            {room.name}
+          </p>
+        )}
         <p className="text-gray-600 dark:text-dark-text-secondary text-xs sm:text-sm line-clamp-2 sm:line-clamp-3 mb-3">
           {session.description || "<No description provided>"}
         </p>

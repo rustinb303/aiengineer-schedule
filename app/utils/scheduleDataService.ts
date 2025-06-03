@@ -5,7 +5,7 @@ import { ScheduleData } from "../types/schedule";
 const CACHE_KEY_SCHEDULE = "schedule_data_cache";
 const CACHE_KEY_MORE_INFO = "schedule_more_info_cache";
 const CACHE_TIMESTAMP_KEY = "schedule_cache_timestamp";
-const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
+const CACHE_DURATION = (parseInt(process.env.NEXT_PUBLIC_CACHE_DURATION_MINUTES || "10") || 10) * 60 * 1000; // Convert minutes to milliseconds, default 10 minutes
 
 const SCHEDULE_URL = "https://sessionize.com/api/v2/w3hd2z8a/view/All";
 const MORE_INFO_URL = "https://www.ai.engineer/sessions-speakers-details.json";

@@ -206,15 +206,23 @@ export default function CalendarView({
                         return (
                           <div
                             key={session.id}
-                            className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 p-1 sm:p-2 rounded border transition-all cursor-pointer overflow-hidden ${
+                            className={`absolute left-0.5 right-0.5 sm:left-1 sm:right-1 p-1 sm:p-2 rounded transition-all cursor-pointer overflow-hidden ${
+                              session.isPlenumSession
+                                ? "border-2 border-orange-400 dark:border-orange-500"
+                                : "border"
+                            } ${
                               hoveredSession === session.id
                                 ? "shadow-lg dark:shadow-dark-card-hover z-20 border-gray-400 dark:border-gray-600"
+                                : session.isPlenumSession
+                                ? ""
                                 : "border-gray-300 dark:border-dark-border hover:shadow-md dark:hover:shadow-dark-card"
                             } ${
-                              isBookmarked
-                                ? "bg-blue-100 dark:bg-blue-900/80"
-                                : isStarred
+                              isStarred
                                 ? "bg-green-100 dark:bg-green-900/80"
+                                : isBookmarked
+                                ? "bg-blue-100 dark:bg-blue-900/80"
+                                : session.isPlenumSession
+                                ? "bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-900/20 dark:to-orange-800/10"
                                 : "bg-white dark:bg-dark-card"
                             }`}
                             style={{ top: `${top}px`, height: `${height}px` }}
