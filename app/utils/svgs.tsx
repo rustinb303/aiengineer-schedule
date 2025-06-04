@@ -114,3 +114,15 @@ export const ShareIcon = () => (
     <line x1="12" y1="2" x2="12" y2="15" />
   </svg>
 );
+
+export const CalendarIcon = () => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+    className="w-4 h-4 sm:w-5 sm:h-5"
+  >
+    <path d="M6 0H3V2H1V5H15V2H13V0H10V2H6V0Z" />
+    <path d="M15 7H1V15H15V7Z" />
+  </svg>
+);

@@ -2,7 +2,7 @@
 import { Session, Speaker, Room } from "../types/schedule";
 import { localStorageUtils } from "../utils/localStorage";
 import { formatTime, formatDate, getDuration } from "../utils/dateTime";
-import { CompanyIcon, RoomIcon, StarIcon } from "../utils/svgs";
+import { CompanyIcon, RoomIcon, StarIcon, CalendarIcon } from "../utils/svgs";
 
 interface SessionCardProps {
   session: Session;
@@ -31,6 +31,30 @@ export default function SessionCard({
   onBookmarkToggle,
   onStarToggle,
 }: SessionCardProps) {
+  const generateGoogleCalendarLink = (
+    session: Session,
+    room?: Room
+  ): string => {
+    const formatDateForGoogle = (dateString: string) =>
+      new Date(dateString).toISOString().replace(/-|:|\.\d{3}/g, "");
+
+    const params = {
+      action: "TEMPLATE",
+      text: session.title,
+      dates: `${formatDateForGoogle(session.startsAt)}/${formatDateForGoogle(
+        session.endsAt
+      )}`,
+      details: session.description || "",
+      location: room?.name || "",
+    };
+
+    const queryString = Object.entries(params)
+      .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+      .join("&");
+
+    return `https://calendar.google.com/calendar/render?${queryString}`;
+  };
+
   const toggleBookmark = (e: React.MouseEvent) => {
     e.stopPropagation();
     // if (isBookmarked) {
@@ -135,6 +159,16 @@ export default function SessionCard({
             >
               <StarIcon />
             </button>
+            <a
+              href={generateGoogleCalendarLink(session, room)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="px-1.5 py-1.5 sm:px-2 sm:py-1 rounded-lg transition-all duration-200 shadow-subtle border-[1.5px] bg-gray-100 dark:bg-gray-400/10 text-gray-400 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border-gray-200 dark:border-white/10"
+              aria-label="Add to Google Calendar"
+            >
+              <CalendarIcon />
+            </a>
           </div>
         </div>
       </div>
@@ -257,6 +291,16 @@ export default function SessionCard({
               >
                 <StarIcon />
               </button>
+              <a
+                href={generateGoogleCalendarLink(session, room)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg transition-all duration-200 min-h-[32px] sm:min-h-[36px] flex items-center justify-center shadow-subtle border-[1.5px] bg-gray-100 dark:bg-gray-400/10 text-gray-400 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border-gray-200 dark:border-white/10"
+                aria-label="Add to Google Calendar"
+              >
+                <CalendarIcon />
+              </a>
             </div>
           </div>
         )}
