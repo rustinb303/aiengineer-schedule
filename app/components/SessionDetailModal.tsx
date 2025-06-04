@@ -51,25 +51,25 @@ export default function SessionDetailModal({
   if (!isOpen || !session) return null;
 
   const toggleBookmark = () => {
-    if (session) {
-      if (isBookmarked) {
-        localStorageUtils.removeBookmark(session.id);
-      } else {
-        localStorageUtils.addBookmark(session.id);
-      }
-      onBookmarkToggle?.();
-    }
+    // if (session) { // session check can remain if needed for other logic, but localStorage part goes
+    //   if (isBookmarked) {
+    //     localStorageUtils.removeBookmark(session.id);
+    //   } else {
+    //     localStorageUtils.addBookmark(session.id);
+    //   }
+    // }
+    onBookmarkToggle?.();
   };
 
   const toggleStar = () => {
-    if (session) {
-      if (isStarred) {
-        localStorageUtils.removeStarred(session.id);
-      } else {
-        localStorageUtils.addStarred(session.id);
-      }
-      onStarToggle?.();
-    }
+    // if (session) { // session check can remain
+    //   if (isStarred) {
+    //     localStorageUtils.removeStarred(session.id);
+    //   } else {
+    //     localStorageUtils.addStarred(session.id);
+    //   }
+    // }
+    onStarToggle?.();
   };
 
   const handleShare = async () => {

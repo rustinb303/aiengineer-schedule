@@ -33,21 +33,21 @@ export default function SessionCard({
 }: SessionCardProps) {
   const toggleBookmark = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isBookmarked) {
-      localStorageUtils.removeBookmark(session.id);
-    } else {
-      localStorageUtils.addBookmark(session.id);
-    }
+    // if (isBookmarked) {
+    //   localStorageUtils.removeBookmark(session.id);
+    // } else {
+    //   localStorageUtils.addBookmark(session.id);
+    // }
     onBookmarkToggle?.();
   };
 
   const toggleStar = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (isStarred) {
-      localStorageUtils.removeStarred(session.id);
-    } else {
-      localStorageUtils.addStarred(session.id);
-    }
+    // if (isStarred) {
+    //   localStorageUtils.removeStarred(session.id);
+    // } else {
+    //   localStorageUtils.addStarred(session.id);
+    // }
     onStarToggle?.();
   };
 
