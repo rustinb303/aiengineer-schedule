@@ -6,6 +6,7 @@ import { BookmarksAndStarsProvider } from "./contexts/BookmarksAndStarsContext";
 import { Suspense } from "react";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -88,6 +89,7 @@ export default function RootLayout({
         <body className="font-sans antialiased">
           <FirebaseAuthProvider>
             <BookmarksAndStarsProvider>
+              <Toaster position="bottom-right" />
               <Suspense fallback={null}>{children}</Suspense>
               <Analytics />
             </BookmarksAndStarsProvider>

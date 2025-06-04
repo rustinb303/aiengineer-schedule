@@ -44,6 +44,7 @@ export default function CalendarView({
 }: CalendarViewProps) {
   const [hoveredSession, setHoveredSession] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
     const checkMobile = () => {
@@ -54,6 +55,15 @@ export default function CalendarView({
     window.addEventListener("resize", checkMobile);
 
     return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Update current time every minute
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(timer);
   }, []);
 
   const timeSlots = generateTimeSlots();
@@ -118,6 +128,37 @@ export default function CalendarView({
     const height = duration * pixelsPerMinute;
 
     return { top: topOffset, height };
+  };
+
+  // Calculate current time position
+  const getCurrentTimePosition = () => {
+    const now = currentTime;
+    const currentHours = now.getHours();
+    const currentMinutes = now.getMinutes();
+
+    // Only show if within calendar hours (9 AM - 6 PM)
+    if (currentHours < 9 || currentHours >= 18) return null;
+
+    const pixelsPerMinute = isMobile ? 3 : 4.5;
+    const topOffset =
+      ((currentHours - 9) * 60 + currentMinutes) * pixelsPerMinute;
+
+    return topOffset;
+  };
+
+  // Check if current time should be shown based on selected day
+  const shouldShowCurrentTime = () => {
+    const now = currentTime;
+    const currentMonth = now.getMonth();
+    const currentDay = now.getDate();
+
+    // June is month 5 (0-indexed)
+    if (currentMonth === 5) {
+      if (currentDay === 4 && selectedDay === 1) return true; // June 4
+      if (currentDay === 5 && selectedDay === 2) return true; // June 5
+    }
+
+    return false;
   };
 
   return (
@@ -252,6 +293,27 @@ export default function CalendarView({
           </tbody>
         </table>
       </div>
+
+      {/* Current Time Indicator */}
+      {shouldShowCurrentTime() && getCurrentTimePosition() !== null && (
+        <div
+          className="absolute left-0 right-0 z-30 pointer-events-none"
+          style={{ top: `${getCurrentTimePosition()! + 40}px` }} // 40px offset for header
+        >
+          <div className="relative">
+            {/* Time label */}
+            <div className="absolute left-0 -top-2 bg-red-500 text-white text-[10px] px-1 rounded shadow-sm">
+              {currentTime.toLocaleTimeString("en-US", {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            </div>
+            {/* Red line */}
+            <div className="h-[2px] bg-red-500 shadow-sm" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

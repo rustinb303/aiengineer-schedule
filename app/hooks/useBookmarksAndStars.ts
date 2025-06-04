@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useFirebaseAuth } from '@/app/contexts/FirebaseAuthContext';
 import { firestoreService } from '@/app/services/firestoreService';
 import { localStorageUtils } from '@/app/utils/localStorage';
 import { useUser } from '@clerk/nextjs';
+
+const SYNC_FLAG_KEY = 'aiengineer_initial_sync_completed';
 
 export function useBookmarksAndStars() {
   const { firebaseUser, loading: firebaseLoading } = useFirebaseAuth();
@@ -12,6 +14,7 @@ export function useBookmarksAndStars() {
   const [bookmarks, setBookmarks] = useState<string[]>([]);
   const [starred, setStarred] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const previousUserIdRef = useRef<string | null>(null);
 
   // Load bookmarks and stars
   const loadData = useCallback(async () => {
@@ -20,56 +23,82 @@ export function useBookmarksAndStars() {
         // Ensure user profile exists
         await firestoreService.ensureUserProfile(firebaseUser.uid, user.emailAddresses[0]?.emailAddress);
         
-        // Get data from both localStorage and Firestore
-        const localBookmarks = localStorageUtils.getBookmarks();
-        const localStarred = localStorageUtils.getStarred();
+        // Check if this is a new login (user ID changed)
+        const isNewLogin = previousUserIdRef.current !== firebaseUser.uid;
+        previousUserIdRef.current = firebaseUser.uid;
+        
+        // Check if initial sync has been completed for this user
+        const syncFlagKey = `${SYNC_FLAG_KEY}_${firebaseUser.uid}`;
+        const hasCompletedInitialSync = localStorage.getItem(syncFlagKey) === 'true';
         
         const [firestoreBookmarks, firestoreStarred] = await Promise.all([
           firestoreService.getBookmarks(firebaseUser.uid),
           firestoreService.getStarred(firebaseUser.uid)
         ]);
         
-        // Create sets for efficient merging
-        const bookmarkSet = new Set(firestoreBookmarks.map(b => b.sessionId));
-        const starredSet = new Set(firestoreStarred.map(s => s.sessionId));
-        
-        // Merge localStorage data into Firestore (only add, don't remove)
-        const bookmarksToAdd = localBookmarks.filter(b => !bookmarkSet.has(b.sessionId));
-        const starredToAdd = localStarred.filter(s => !starredSet.has(s.sessionId));
-        
-        // Add missing localStorage items to Firestore
-        const syncPromises: Promise<void>[] = [];
-        
-        bookmarksToAdd.forEach(bookmark => {
-          bookmarkSet.add(bookmark.sessionId);
-          syncPromises.push(
-            firestoreService.addBookmark(firebaseUser.uid, bookmark.sessionId)
-              .catch(err => console.error('Error syncing bookmark to Firestore:', err))
-          );
-        });
-        
-        starredToAdd.forEach(star => {
-          starredSet.add(star.sessionId);
-          syncPromises.push(
-            firestoreService.addStarred(firebaseUser.uid, star.sessionId)
-              .catch(err => console.error('Error syncing star to Firestore:', err))
-          );
-        });
-        
-        // Wait for all sync operations to complete
-        await Promise.all(syncPromises);
-        
-        // Update state with merged data
-        const mergedBookmarks = Array.from(bookmarkSet);
-        const mergedStarred = Array.from(starredSet);
-        
-        setBookmarks(mergedBookmarks);
-        setStarred(mergedStarred);
-        
-        // Update localStorage with the merged data
-        localStorageUtils.clearAll();
-        mergedBookmarks.forEach(id => localStorageUtils.addBookmark(id));
-        mergedStarred.forEach(id => localStorageUtils.addStarred(id));
+        // Only merge localStorage data on first login or if switching users
+        if (isNewLogin && !hasCompletedInitialSync) {
+          // Get data from localStorage for merging
+          const localBookmarks = localStorageUtils.getBookmarks();
+          const localStarred = localStorageUtils.getStarred();
+          
+          // Create sets for efficient merging
+          const bookmarkSet = new Set(firestoreBookmarks.map(b => b.sessionId));
+          const starredSet = new Set(firestoreStarred.map(s => s.sessionId));
+          
+          // Merge localStorage data into Firestore (only add, don't remove)
+          const bookmarksToAdd = localBookmarks.filter(b => !bookmarkSet.has(b.sessionId));
+          const starredToAdd = localStarred.filter(s => !starredSet.has(s.sessionId));
+          
+          // Add missing localStorage items to Firestore
+          const syncPromises: Promise<void>[] = [];
+          
+          bookmarksToAdd.forEach(bookmark => {
+            bookmarkSet.add(bookmark.sessionId);
+            syncPromises.push(
+              firestoreService.addBookmark(firebaseUser.uid, bookmark.sessionId)
+                .catch(err => console.error('Error syncing bookmark to Firestore:', err))
+            );
+          });
+          
+          starredToAdd.forEach(star => {
+            starredSet.add(star.sessionId);
+            syncPromises.push(
+              firestoreService.addStarred(firebaseUser.uid, star.sessionId)
+                .catch(err => console.error('Error syncing star to Firestore:', err))
+            );
+          });
+          
+          // Wait for all sync operations to complete
+          await Promise.all(syncPromises);
+          
+          // Mark initial sync as completed
+          localStorage.setItem(syncFlagKey, 'true');
+          
+          // Update state with merged data
+          const mergedBookmarks = Array.from(bookmarkSet);
+          const mergedStarred = Array.from(starredSet);
+          
+          setBookmarks(mergedBookmarks);
+          setStarred(mergedStarred);
+          
+          // Update localStorage with the merged data
+          localStorageUtils.clearAll();
+          mergedBookmarks.forEach(id => localStorageUtils.addBookmark(id));
+          mergedStarred.forEach(id => localStorageUtils.addStarred(id));
+        } else {
+          // Not first login, just use Firestore data
+          const firestoreBookmarkIds = firestoreBookmarks.map(b => b.sessionId);
+          const firestoreStarredIds = firestoreStarred.map(s => s.sessionId);
+          
+          setBookmarks(firestoreBookmarkIds);
+          setStarred(firestoreStarredIds);
+          
+          // Update localStorage to match Firestore (Firestore is source of truth)
+          localStorageUtils.clearAll();
+          firestoreBookmarkIds.forEach(id => localStorageUtils.addBookmark(id));
+          firestoreStarredIds.forEach(id => localStorageUtils.addStarred(id));
+        }
         
       } catch (error) {
         console.error('Error loading from Firestore:', error);

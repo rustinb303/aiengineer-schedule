@@ -1,6 +1,7 @@
 import scheduleDataFallback from "../../schedule.json";
 import scheduleMoreInfoFallback from "../../schedule-more-info.json";
 import { ScheduleData } from "../types/schedule";
+import { toast } from "react-hot-toast";
 
 const CACHE_KEY_SCHEDULE = "schedule_data_cache";
 const CACHE_KEY_MORE_INFO = "schedule_more_info_cache";
@@ -141,6 +142,12 @@ class ScheduleDataService {
       this.saveToLocalStorage();
 
       console.log("Fetched latest scheduling data from json");
+
+      if (typeof window !== "undefined" && !localStorage.getItem("user")) {
+        toast("Sign in to save your bookmarks", {
+          icon: "🗨️",
+        });
+      }
 
       return {
         schedule: scheduleData,

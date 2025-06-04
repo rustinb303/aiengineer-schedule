@@ -38,7 +38,19 @@ export default function Home() {
     categories: [],
   });
   const [mainView, setMainView] = useState<"speakers" | "talks">("talks");
-  const [selectedDay, setSelectedDay] = useState(0);
+
+  // Default to current date if it's June 4th or 5th, otherwise 'all'
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth(); // 0-indexed, so June is 5
+  const currentDay = currentDate.getDate();
+  const defaultDay =
+    currentMonth === 5 && currentDay === 4
+      ? 1 // June 4 maps to day 1
+      : currentMonth === 5 && currentDay === 5
+      ? 2 // June 5 maps to day 2
+      : 0; // Otherwise show all days
+
+  const [selectedDay, setSelectedDay] = useState(defaultDay);
   const [selectedTrack, setSelectedTrack] = useState("");
   const [showBookmarked, setShowBookmarked] = useState(false);
   const [showStarred, setShowStarred] = useState(false);
@@ -93,9 +105,54 @@ export default function Home() {
           return session;
         });
 
+        // Add manual keynote events for June 4th
+        const manualKeynoteEvents: Session[] = [
+          {
+            id: "manual-keynote-1",
+            title: "Welcome to AI Engineer",
+            description:
+              "Emcee Laurie Voss and curator swyx kick off the conference.",
+            startsAt: "2025-06-04T09:00:00",
+            endsAt: "2025-06-04T09:20:00",
+            isServiceSession: false,
+            isPlenumSession: true,
+            speakers: [],
+            categoryItems: [],
+            questionAnswers: [],
+            roomId: 61336, // Keynote/General Session (Yerba Buena 7&8)
+            liveUrl: null,
+            recordingUrl: null,
+            status: "Accepted",
+            isInformed: true,
+            isConfirmed: true,
+          },
+          {
+            id: "manual-keynote-2",
+            title: "Track Intros ft. Agentic GraphRAG",
+            description:
+              "Laurie introduces each track, with special feature from Stephen Chin",
+            startsAt: "2025-06-04T10:20:00",
+            endsAt: "2025-06-04T10:30:00",
+            isServiceSession: false,
+            isPlenumSession: true,
+            speakers: [],
+            categoryItems: [],
+            questionAnswers: [],
+            roomId: 61336, // Keynote/General Session (Yerba Buena 7&8)
+            liveUrl: null,
+            recordingUrl: null,
+            status: "Accepted",
+            isInformed: true,
+            isConfirmed: true,
+          },
+        ];
+
+        // Combine original sessions with manual events
+        const allSessions = [...mergedSessions, ...manualKeynoteEvents];
+
         setData({
           ...schedule,
-          sessions: mergedSessions,
+          sessions: allSessions,
         });
       } catch (error) {
         console.error("Error loading schedule data:", error);
