@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
-import { FirebaseAuthProvider } from "./contexts/FirebaseAuthContext";
 import { BookmarksAndStarsProvider } from "./contexts/BookmarksAndStarsContext";
 import { Suspense } from "react";
 import "./globals.css";
@@ -84,18 +82,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" className={inter.variable}>
-        <body className="font-sans antialiased">
-          <FirebaseAuthProvider>
-            <BookmarksAndStarsProvider>
-              <Toaster position="bottom-right" />
-              <Suspense fallback={null}>{children}</Suspense>
-              <Analytics />
-            </BookmarksAndStarsProvider>
-          </FirebaseAuthProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" className={inter.variable}>
+      <body className="font-sans antialiased">
+        <BookmarksAndStarsProvider>
+          <Toaster position="bottom-right" />
+          <Suspense fallback={null}>{children}</Suspense>
+          <Analytics />
+        </BookmarksAndStarsProvider>
+      </body>
+    </html>
   );
 }

@@ -7,14 +7,13 @@ interface BookmarksAndStarsContextType {
   bookmarks: string[];
   starred: string[];
   loading: boolean;
-  isAuthenticated: boolean;
   addBookmark: (sessionId: string, sessionTitle?: string) => Promise<void>;
   removeBookmark: (sessionId: string) => Promise<void>;
   isBookmarked: (sessionId: string) => boolean;
   addStarred: (sessionId: string, sessionTitle?: string) => Promise<void>;
   removeStarred: (sessionId: string) => Promise<void>;
   isStarred: (sessionId: string) => boolean;
-  refresh: () => Promise<void>;
+  refresh: () => void;
 }
 
 const BookmarksAndStarsContext = createContext<BookmarksAndStarsContextType | null>(null);

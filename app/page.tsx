@@ -2,13 +2,6 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import {
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
 import SessionCard from "./components/SessionCard";
 import CalendarView from "./components/CalendarView";
 import SpeakersView from "./components/SpeakersView";
@@ -72,7 +65,6 @@ export default function Home() {
     removeStarred,
     isStarred,
     loading: bookmarksLoading,
-    isAuthenticated,
   } = useBookmarksAndStarsContext();
 
   useEffect(() => {
@@ -281,135 +273,60 @@ export default function Home() {
           <div className="py-4 lg:py-6">
             {/* Mobile View */}
             <div className="sm:hidden">
-              <SignedIn>
-                {/* Mobile Signed In: Title left, UserButton right */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h1 className="text-xl font-bold text-gray-900 dark:text-dark-text-primary">
-                      AI Engineer World's Fair 2025
-                    </h1>
-                    <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
-                      June 3-5, 2025 • San Francisco •{" "}
-                      <a
-                        href="https://x.com/pallavmac"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 dark:text-blue-400 hover:underline"
-                      >
-                        👨‍💻 @pallavmac
-                      </a>
-                    </p>
-                  </div>
-                  <UserButton
-                    appearance={{
-                      elements: {
-                        avatarBox: "w-8 h-8", // Mobile specific size
-                      },
-                    }}
-                  >
-                    <UserButton.MenuItems>
-                      <UserButton.Action
-                        label="Contact"
-                        labelIcon={<EmailIcon />}
-                        onClick={() =>
-                          window.open("mailto:agpallav@gmail.com", "_blank")
-                        }
-                      />
-                      <UserButton.Link
-                        label="Contribute"
-                        labelIcon={<GithubIcon />}
-                        href="https://github.com/PallavAg/aiengineer-schedule"
-                      />
-                      {/* Status Text */}
-                      <UserButton.Action
-                        label="Schedule up to date"
-                        labelIcon={<p>🟢</p>}
+              {/* Mobile Signed Out: Title top, Buttons bottom */}
+              <div className="flex flex-col">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
+                    AI Engineer World's Fair 2025
+                  </h1>
+                  <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
+                    June 3-5, 2025 • San Francisco •{" "}
+                    <a
+                      href="https://x.com/pallavmac"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 dark:text-blue-400 hover:underline"
+                    >
+                      👨‍💻 @pallavmac
+                    </a>
+                  </p>
+                  <div className="flex flex-row items-center gap-[6px] text-xs text-gray-600 dark:text-dark-text-secondary mt-2">
+                    <button
+                      className="flex flex-row rounded-lg bg-gray-100 dark:bg-dark-hover px-2 py-1 gap-1 items-center shadow-subtle dark:shadow-dark-subtle border-[1.5px] border-gray-200 dark:border-gray-400/10"
+                      onClick={() =>
+                        window.open(
+                          "https://github.com/PallavAg/aiengineer-schedule",
+                          "_blank"
+                        )
+                      }
+                    >
+                      <GithubIcon /> Contribute
+                    </button>
+                    <button
+                      className="flex flex-row rounded-lg bg-gray-100 dark:bg-dark-hover px-2 py-1 gap-1 items-center shadow-subtle dark:shadow-dark-subtle border-[1.5px] border-gray-200 dark:border-gray-400/10"
+                      onClick={() =>
+                        window.open("mailto:agpallav@gmail.com", "_blank")
+                      }
+                    >
+                      <EmailIcon /> Contact
+                    </button>
+                    <div className="flex flex-row rounded-lg bg-gray-100 dark:bg-dark-hover px-2 py-1 gap-2 items-center shadow-subtle dark:shadow-dark-subtle border-[1.5px] border-gray-200 dark:border-gray-400/10">
+                      <div className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
+                      <button
+                        className="text-green-600 dark:text-green-400 cursor-default"
                         onClick={() =>
                           window.open(
                             "https://www.ai.engineer/schedule",
                             "_blank"
                           )
                         }
-                      />
-                    </UserButton.MenuItems>
-                  </UserButton>
-                </div>
-              </SignedIn>
-              <SignedOut>
-                {/* Mobile Signed Out: Title top, Buttons bottom */}
-                <div className="flex flex-col">
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-dark-text-primary">
-                      AI Engineer World's Fair 2025
-                    </h1>
-                    <p className="text-sm text-gray-600 dark:text-dark-text-secondary">
-                      June 3-5, 2025 • San Francisco •{" "}
-                      <a
-                        href="https://x.com/pallavmac"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 dark:text-blue-400 hover:underline"
                       >
-                        👨‍💻 @pallavmac
-                      </a>
-                    </p>
-                    <div className="flex flex-row items-center gap-[6px] text-xs text-gray-600 dark:text-dark-text-secondary mt-2">
-                      <button
-                        className="flex flex-row rounded-lg bg-gray-100 dark:bg-dark-hover px-2 py-1 gap-1 items-center shadow-subtle dark:shadow-dark-subtle border-[1.5px] border-gray-200 dark:border-gray-400/10"
-                        onClick={() =>
-                          window.open(
-                            "https://github.com/PallavAg/aiengineer-schedule",
-                            "_blank"
-                          )
-                        }
-                      >
-                        <GithubIcon /> Contribute
+                        Schedule up to date
                       </button>
-                      <button
-                        className="flex flex-row rounded-lg bg-gray-100 dark:bg-dark-hover px-2 py-1 gap-1 items-center shadow-subtle dark:shadow-dark-subtle border-[1.5px] border-gray-200 dark:border-gray-400/10"
-                        onClick={() =>
-                          window.open("mailto:agpallav@gmail.com", "_blank")
-                        }
-                      >
-                        <EmailIcon /> Contact
-                      </button>
-                      <div className="flex flex-row rounded-lg bg-gray-100 dark:bg-dark-hover px-2 py-1 gap-2 items-center shadow-subtle dark:shadow-dark-subtle border-[1.5px] border-gray-200 dark:border-gray-400/10">
-                        <div className="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div>
-                        <button
-                          className="text-green-600 dark:text-green-400 cursor-default"
-                          onClick={() =>
-                            window.open(
-                              "https://www.ai.engineer/schedule",
-                              "_blank"
-                            )
-                          }
-                        >
-                          Schedule up to date
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="mt-3">
-                    <div className="flex flex-row items-center gap-2">
-                      <div className="flex gap-2">
-                        <SignInButton mode="modal">
-                          <button className="px-4 py-1.5 text-sm bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200 rounded-lg border border-gray-900 dark:border-gray-100 transition-all duration-200 shadow-subtle hover:shadow-card">
-                            Sign In
-                          </button>
-                        </SignInButton>
-                        <SignUpButton mode="modal">
-                          <button className="px-4 py-1.5 text-sm bg-gray-100 dark:bg-dark-hover text-gray-900 dark:text-dark-text-primary hover:bg-gray-200 dark:hover:bg-dark-border rounded-lg border-2 border-gray-200 dark:border-gray-400/10 transition-all duration-200 shadow-subtle hover:shadow-card">
-                            Sign Up
-                          </button>
-                        </SignUpButton>
-                      </div>
-                      <p className="text-xs text-gray-600 dark:text-dark-text-muted">
-                        ← Sync across devices
-                      </p>
                     </div>
                   </div>
                 </div>
-              </SignedOut>
+              </div>
             </div>
 
             {/* Desktop View (sm and larger) - Replicates original layout */}
@@ -465,37 +382,6 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-              </div>
-              {/* Auth Block (Right) */}
-              <div className="flex items-center">
-                <SignedOut>
-                  <div className="flex flex-row sm:flex-col gap-2 sm:gap-1 items-center">
-                    <div className="flex gap-2">
-                      <SignInButton mode="modal">
-                        <button className="px-3 py-1.5 sm:px-6 sm:py-2 text-sm bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200 rounded-lg border border-gray-900 dark:border-white transition-all duration-200 shadow-subtle hover:shadow-card">
-                          Sign In
-                        </button>
-                      </SignInButton>
-                      <SignUpButton mode="modal">
-                        <button className="px-3 py-1.5 sm:px-6 sm:py-2 text-sm bg-gray-100 dark:bg-dark-hover text-gray-900 dark:text-dark-text-primary hover:bg-gray-200 dark:hover:bg-dark-border rounded-lg border-2 border-gray-200 dark:border-gray-400/10 transition-all duration-200 shadow-subtle hover:shadow-card">
-                          Sign Up
-                        </button>
-                      </SignUpButton>
-                    </div>
-                    <p className="text-xs text-gray-600 dark:text-dark-text-muted">
-                      To sync across devices
-                    </p>
-                  </div>
-                </SignedOut>
-                <SignedIn>
-                  <UserButton
-                    appearance={{
-                      elements: {
-                        avatarBox: "w-8 h-8 sm:w-9 sm:h-9", // Original responsive sizes
-                      },
-                    }}
-                  />
-                </SignedIn>
               </div>
             </div>
           </div>
