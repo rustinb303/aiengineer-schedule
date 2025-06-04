@@ -8,7 +8,7 @@ import SpeakersView from "./components/SpeakersView";
 import SessionDetailModal from "./components/SessionDetailModal";
 import FilterBar from "./components/FilterBar";
 import SearchOverlay from "./components/SearchOverlay";
-import { ScheduleData, SessionMoreInfo, Session } from "./types/schedule";
+import { ScheduleData as PageScheduleData, SessionMoreInfo, Session, Schedule } from "./types/schedule"; // Added Schedule
 import { useBookmarksAndStarsContext } from "./contexts/BookmarksAndStarsContext";
 import { getSessionDay } from "./utils/dateTime";
 import { EmailIcon, GithubIcon, SpeakerIcon, TalkIcon } from "./utils/svgs";
@@ -23,13 +23,8 @@ export default function Home() {
   const [sessionIdFromUrl, setSessionIdFromUrl] = useState<string | null>(null);
   const searchParams = useSearchParams();
 
-  const [data, setData] = useState<ScheduleData>({
-    sessions: [],
-    speakers: [],
-    rooms: [],
-    questions: [],
-    categories: [],
-  });
+  const [data, setData] = useState<Schedule | undefined>(undefined); // Changed type to Schedule | undefined
+  const [moreInfoArray, setMoreInfoArray] = useState<any[] | undefined>(undefined); // Added moreInfoArray state
   const [mainView, setMainView] = useState<"speakers" | "talks">("talks");
 
   // Default to current date if it's June 4th or 5th, otherwise 'all'
@@ -74,16 +69,22 @@ export default function Home() {
 
       try {
         const scheduleService = ScheduleDataService.getInstance();
-        const { schedule, moreInfo } =
-          await scheduleService.fetchScheduleData();
+        // scheduleService.fetchScheduleData() returns an object { schedule: Schedule, moreInfo: any[] }
+        // Let's call it fetchedDataContainer to avoid confusion with the 'schedule' variable inside it.
+        const fetchedDataContainer = await scheduleService.fetchScheduleData();
+
+        const fetchedScheduleObject = fetchedDataContainer.schedule; // This is the Schedule object
+        const fetchedMoreInfoArray = fetchedDataContainer.moreInfo; // This is the array for moreInfo
+
+        setMoreInfoArray(fetchedMoreInfoArray); // Set the new state for moreInfo
 
         // Merge schedule data with additional info
         const moreInfoMap = new Map<string, SessionMoreInfo>();
-        (moreInfo as SessionMoreInfo[]).forEach((info) => {
+        (fetchedMoreInfoArray as SessionMoreInfo[]).forEach((info) => {
           moreInfoMap.set(info["Session ID"], info);
         });
 
-        const mergedSessions = schedule.sessions.map((session) => {
+        const mergedSessions = fetchedScheduleObject.sessions.map((session) => {
           const moreInfoData = moreInfoMap.get(session.id);
           if (moreInfoData) {
             return {
@@ -142,8 +143,8 @@ export default function Home() {
         // Combine original sessions with manual events
         const allSessions = [...mergedSessions, ...manualKeynoteEvents];
 
-        setData({
-          ...schedule,
+        setData({ // data state now holds the Schedule object
+          ...fetchedScheduleObject,
           sessions: allSessions,
         });
       } catch (error) {
@@ -167,7 +168,7 @@ export default function Home() {
 
   // Open modal if session ID is in URL
   useEffect(() => {
-    if (sessionIdFromUrl && data.sessions.length > 0 && !isLoading) {
+    if (sessionIdFromUrl && data && data.sessions.length > 0 && !isLoading) { // Added check for data
       const session = data.sessions.find((s) => s.id === sessionIdFromUrl);
       if (session) {
         setSelectedSession(session);
@@ -178,6 +179,7 @@ export default function Home() {
 
   // Get unique tracks from sessions
   const availableTracks = useMemo(() => {
+    if (!data) return []; // Added check for data
     const tracks = new Set<string>();
     data.sessions.forEach((session) => {
       // Get room name for this session
@@ -190,9 +192,10 @@ export default function Home() {
       }
     });
     return Array.from(tracks).sort();
-  }, [data.sessions, data.rooms]);
+  }, [data]); // Simplified dependency
 
   const filteredSessions = useMemo(() => {
+    if (!data) return []; // Added check for data
     let filtered = data.sessions;
 
     // Filter by day
@@ -230,8 +233,7 @@ export default function Home() {
       (a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()
     );
   }, [
-    data.sessions,
-    data.rooms,
+    data, // Simplified dependency
     selectedDay,
     selectedTrack,
     showBookmarked,
@@ -654,19 +656,22 @@ export default function Home() {
       <SessionDetailModal
         session={selectedSession}
         speakers={
-          selectedSession
+          selectedSession && data && data.speakers // Added check for data
             ? data.speakers.filter((s) =>
                 selectedSession.speakers.includes(s.id)
               )
             : undefined
         }
         room={
-          selectedSession
+          selectedSession && data && data.rooms // Added check for data
             ? data.rooms.find((r) => r.id === selectedSession.roomId)
             : undefined
         }
         isOpen={isModalOpen}
         onClose={closeModal}
+        // ... other props ...
+        scheduleData={data}
+        allMoreInfo={moreInfoArray}
         isBookmarked={
           selectedSession ? bookmarkedIds.includes(selectedSession.id) : false
         }
@@ -697,9 +702,9 @@ export default function Home() {
       <SearchOverlay
         isOpen={isSearchOpen}
         onClose={() => setIsSearchOpen(false)}
-        sessions={data.sessions}
-        speakers={data.speakers}
-        rooms={data.rooms}
+        sessions={data ? data.sessions : []} // Added check for data
+        speakers={data ? data.speakers : []} // Added check for data
+        rooms={data ? data.rooms : []}       // Added check for data
         onSessionClick={handleSessionClick}
       />
     </div>

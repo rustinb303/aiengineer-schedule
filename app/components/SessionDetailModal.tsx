@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-import { Session, Speaker, Room } from "../types/schedule";
+import { useState, useEffect } from "react";
+import { generateSessionSummary } from "../services/geminiService";
+import { Schedule, Session, Speaker, Room } from "../types/schedule";
 import { localStorageUtils } from "../utils/localStorage";
 import { formatTime, formatDate, getDuration } from "../utils/dateTime";
 import { getSessionTrack, requiresAILeadersPass } from "../utils/trackUtils";
@@ -17,6 +18,8 @@ interface SessionDetailModalProps {
   isStarred?: boolean;
   onBookmarkToggle?: () => void;
   onStarToggle?: () => void;
+  scheduleData?: Schedule;
+  allMoreInfo?: any[];
 }
 
 export default function SessionDetailModal({
@@ -29,7 +32,32 @@ export default function SessionDetailModal({
   isStarred = false,
   onBookmarkToggle,
   onStarToggle,
+  scheduleData, // Explicitly destructure
+  allMoreInfo   // Explicitly destructure
 }: SessionDetailModalProps) {
+  const [summary, setSummary] = useState<string>("");
+  const [isLoadingSummary, setIsLoadingSummary] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (session && isOpen && scheduleData && allMoreInfo) { // Use destructured props
+      setIsLoadingSummary(true);
+      setSummary("");
+
+      generateSessionSummary(session, scheduleData, allMoreInfo) // Use destructured props
+        .then(setSummary)
+        .catch((error) => {
+          console.error("Failed to generate summary:", error);
+          setSummary("Error: Could not load summary.");
+        })
+        .finally(() => {
+          setIsLoadingSummary(false);
+        });
+    } else if (!isOpen) {
+      setSummary("");
+      setIsLoadingSummary(false);
+    }
+  }, [session, isOpen, scheduleData, allMoreInfo]); // Update dependency array
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -234,6 +262,23 @@ export default function SessionDetailModal({
               )
             );
           })()}
+
+          {/* AI Summary Section */}
+          <div className="mb-4 sm:mb-6">
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary mb-2">
+              AI Summary
+            </h3>
+            {isLoadingSummary && (
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-dark-text-muted italic">
+                Generating summary...
+              </p>
+            )}
+            {summary && !isLoadingSummary && (
+              <p className={`text-xs sm:text-sm whitespace-pre-wrap ${summary.startsWith('Error:') ? 'text-red-500 dark:text-red-400' : 'text-gray-600 dark:text-dark-text-secondary'}`}>
+                {summary}
+              </p>
+            )}
+          </div>
 
           {/* Description */}
           <div className="mb-4 sm:mb-6">
