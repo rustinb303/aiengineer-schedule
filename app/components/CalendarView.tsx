@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Session, Room, Speaker } from "../types/schedule";
 import { localStorageUtils } from "../utils/localStorage";
 import {
@@ -45,6 +45,8 @@ export default function CalendarView({
   const [hoveredSession, setHoveredSession] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [headerHeight, setHeaderHeight] = useState(0);
+  const headerRef = useRef<HTMLTableSectionElement>(null);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -63,8 +65,12 @@ export default function CalendarView({
       setCurrentTime(new Date());
     }, 60000); // Update every minute
 
+    if (headerRef.current) {
+      setHeaderHeight(headerRef.current.offsetHeight);
+    }
+
     return () => clearInterval(timer);
-  }, []);
+  }, [headerHeight]);
 
   const timeSlots = generateTimeSlots();
 
@@ -167,7 +173,7 @@ export default function CalendarView({
         {/* min width should be 2000 on all screen sizes */}
         <table className="min-w-[2000px] table-fixed">
           {/* Header with room names */}
-          <thead>
+          <thead ref={headerRef}>
             <tr className="border-b border-gray-200 dark:border-dark-border">
               <th className="w-14 sm:w-20 p-1 sm:p-2 bg-zinc-50 dark:bg-dark-hover border-r border-gray-200 dark:border-dark-border"></th>
               {dayRooms.map((room, index) => (
@@ -298,7 +304,7 @@ export default function CalendarView({
       {shouldShowCurrentTime() && getCurrentTimePosition() !== null && (
         <div
           className="absolute left-0 right-0 z-30 pointer-events-none"
-          style={{ top: `${getCurrentTimePosition()! + 40}px` }} // 40px offset for header
+          style={{ top: `${getCurrentTimePosition()! + headerHeight}px` }}
         >
           <div className="relative">
             {/* Time label */}
