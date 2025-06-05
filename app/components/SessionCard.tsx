@@ -1,18 +1,8 @@
 "use client";
 import { Session, Speaker, Room } from "../types/schedule";
 import { localStorageUtils } from "../utils/localStorage";
-import {
-  formatTime,
-  formatDate,
-  getDuration,
-  formatToGoogleCalendarDate,
-} from "../utils/dateTime";
-import {
-  CompanyIcon,
-  RoomIcon,
-  StarIcon,
-  CalendarIcon,
-} from "../utils/svgs";
+import { formatTime, formatDate, getDuration } from "../utils/dateTime";
+import { CompanyIcon, RoomIcon, StarIcon, CalendarIcon } from "../utils/svgs";
 
 interface SessionCardProps {
   session: Session;
@@ -61,20 +51,26 @@ export default function SessionCard({
     onStarToggle?.();
   };
 
-  const duration = getDuration(session.startsAt, session.endsAt);
-
-  const handleCalendarClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent card click event
-    const text = encodeURIComponent(session.title);
-    const dates = `${formatToGoogleCalendarDate(
-      session.startsAt
-    )}/${formatToGoogleCalendarDate(session.endsAt)}`;
-    const details = encodeURIComponent(session.description || "");
-    const location = encodeURIComponent(room?.name || "");
-
-    const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${dates}&details=${details}&location=${location}`;
-    window.open(calendarUrl, "_blank", "noopener,noreferrer");
+  const formatGoogleCalendarDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
   };
+
+  const handleAddToCalendarClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const baseUrl = "https://www.google.com/calendar/render?action=TEMPLATE";
+    const params = new URLSearchParams({
+      text: session.title,
+      details: session.description || "",
+      dates: `${formatGoogleCalendarDate(session.startsAt)}/${formatGoogleCalendarDate(session.endsAt)}`,
+    });
+    if (room?.name) {
+      params.append("location", room.name);
+    }
+    window.open(`${baseUrl}&${params.toString()}`, "_blank");
+  };
+
+  const duration = getDuration(session.startsAt, session.endsAt);
 
   if (isCompactView) {
     return (
@@ -158,16 +154,13 @@ export default function SessionCard({
             >
               <StarIcon />
             </button>
-            <a
-              href="#" // Href will be set by JS, but is required for <a>
-              onClick={handleCalendarClick}
-              className="px-1.5 py-1.5 sm:px-2 sm:py-1 rounded-lg transition-all duration-200 shadow-subtle border-[1.5px] bg-gray-100 dark:bg-gray-400/10 text-gray-400 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border-gray-200 dark:border-white/10"
+            <button
+              onClick={handleAddToCalendarClick}
+              className={`px-1.5 py-1.5 sm:px-2 sm:py-1 rounded-lg transition-all duration-200 shadow-subtle border-[1.5px] bg-gray-100 dark:bg-gray-400/10 text-gray-400 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border-gray-200 dark:border-white/10`}
               aria-label="Add to Google Calendar"
-              title="Add to Google Calendar"
-              data-testid="add-to-calendar-button-compact"
             >
-              <CalendarIcon className="w-4 h-3.5 sm:w-4 sm:h-4" />
-            </a>
+              <CalendarIcon />
+            </button>
           </div>
         </div>
       </div>
@@ -290,16 +283,13 @@ export default function SessionCard({
               >
                 <StarIcon />
               </button>
-            <a
-              href="#" // Href will be set by JS, but is required for <a>
-              onClick={handleCalendarClick}
-              className="px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg transition-all duration-200 min-h-[32px] sm:min-h-[36px] flex items-center justify-center shadow-subtle border-[1.5px] bg-gray-100 dark:bg-gray-400/10 text-gray-400 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border-gray-200 dark:border-white/10"
+            <button
+              onClick={handleAddToCalendarClick}
+              className={`px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg transition-all duration-200 min-h-[32px] sm:min-h-[36px] flex items-center justify-center shadow-subtle border-[1.5px] bg-gray-100 dark:bg-gray-400/10 text-gray-400 dark:text-dark-text-muted hover:bg-gray-200 dark:hover:bg-dark-border border-gray-200 dark:border-white/10`}
               aria-label="Add to Google Calendar"
-              title="Add to Google Calendar"
-              data-testid="add-to-calendar-button-default"
             >
-              <CalendarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-            </a>
+              <CalendarIcon />
+            </button>
             </div>
           </div>
         )}

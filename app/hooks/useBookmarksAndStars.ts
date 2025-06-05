@@ -22,8 +22,13 @@ export function useBookmarksAndStars() {
 
   // Bookmark operations
   const addBookmark = useCallback(async (sessionId: string, sessionTitle?: string) => {
-    setBookmarks(prev => [...prev, sessionId]);
-    localStorageUtils.addBookmark(sessionId);
+    setBookmarks(prev => {
+      if (prev.includes(sessionId)) {
+        return prev;
+      }
+      return [...prev, sessionId];
+    });
+    localStorageUtils.addBookmark(sessionId); // This already checks for duplicates for storage
   }, [setBookmarks]);
 
   const removeBookmark = useCallback(async (sessionId: string) => {
@@ -37,8 +42,13 @@ export function useBookmarksAndStars() {
 
   // Star operations
   const addStarred = useCallback(async (sessionId: string, sessionTitle?: string) => {
-    setStarred(prev => [...prev, sessionId]);
-    localStorageUtils.addStarred(sessionId);
+    setStarred(prev => {
+      if (prev.includes(sessionId)) {
+        return prev;
+      }
+      return [...prev, sessionId];
+    });
+    localStorageUtils.addStarred(sessionId); // This already checks for duplicates for storage
   }, [setStarred]);
 
   const removeStarred = useCallback(async (sessionId: string) => {

@@ -72,20 +72,3 @@ export function getSessionsForTimeSlot(
     );
   });
 }
-
-export function formatToGoogleCalendarDate(dateString: string): string {
-  if (!dateString) return "";
-  const date = new Date(dateString);
-  // Format: YYYYMMDDTHHMMSSZ
-  // Example: 20240720T100000Z
-  return (
-    date.getUTCFullYear() +
-    ("0" + (date.getUTCMonth() + 1)).slice(-2) +
-    ("0" + date.getUTCDate()).slice(-2) +
-    "T" +
-    ("0" + date.getUTCHours()).slice(-2) +
-    ("0" + date.getUTCMinutes()).slice(-2) +
-    ("0" + date.getUTCSeconds()).slice(-2) +
-    "Z"
-  );
-}

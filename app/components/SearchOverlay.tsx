@@ -134,24 +134,33 @@ export default function SearchOverlay({
 
       // Check speakers
       let matchedSpeaker: Speaker | undefined;
-      for (const speakerId of session.speakers) {
-        const speaker = speakerMap.get(speakerId);
-        if (speaker && speaker.fullName) {
-          const matches = findMatches(speaker.fullName, debouncedSearchTerm);
-          if (matches.length > 0) {
-            matchedIn.push("speaker");
-            matchedSpeaker = speaker;
-            speakerMatches = matches;
-            break; // Use first matching speaker
+      // Ensure session.speakerIds exists and is an array before iterating
+      if (session.speakerIds && Array.isArray(session.speakerIds)) {
+        for (const speakerId of session.speakerIds) {
+          const speaker = speakerMap.get(speakerId);
+          if (speaker && speaker.fullName) { // Check speaker and fullName
+            const matches = findMatches(speaker.fullName, debouncedSearchTerm);
+            if (matches.length > 0) {
+              matchedIn.push("speaker");
+              matchedSpeaker = speaker;
+              speakerMatches = matches;
+              break; // Use first matching speaker
+            }
           }
         }
       }
 
       if (matchedIn.length > 0) {
         const room = rooms.find((r) => r.id === session.roomId);
+        let finalSpeaker = matchedSpeaker;
+        // If no speaker matched directly via search term, but session has speakers,
+        // assign the first speaker for display purposes (as per original logic before modifications).
+        if (!finalSpeaker && session.speakerIds && session.speakerIds.length > 0) {
+          finalSpeaker = speakerMap.get(session.speakerIds[0]);
+        }
         results.push({
           session,
-          speaker: matchedSpeaker || speakerMap.get(session.speakers[0]),
+          speaker: finalSpeaker,
           room,
           matchedIn,
           titleMatches,
