@@ -62,6 +62,12 @@ export default function SessionCard({
             : "bg-white dark:bg-dark-card"
         } ${session.isPlenumSession ? "border-2 border-orange-400 dark:border-orange-500" : "border-[1.5px] border-gray-200 dark:border-dark-border"} rounded-xl p-3 sm:p-4 shadow-card dark:shadow-dark-card hover:shadow-card-hover dark:hover:shadow-dark-card-hover transition-all duration-200 cursor-pointer`}
         onClick={onClick}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            onClick?.();
+          }
+        }}
       >
         <div className="flex items-center justify-between gap-4">
           {/* Left side - Time and Title */}
@@ -149,6 +155,12 @@ export default function SessionCard({
           : "bg-white dark:bg-dark-card"
       } ${session.isPlenumSession ? "border-2 border-orange-400 dark:border-orange-500" : "border-[1.5px] border-gray-200 dark:border-dark-border"} rounded-xl p-4 sm:p-6 shadow-card dark:shadow-dark-card hover:shadow-card-hover dark:hover:shadow-dark-card-hover transition-all duration-200 cursor-pointer flex flex-col h-full`}
       onClick={onClick}
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          onClick?.();
+        }
+      }}
     >
       {/* Top section - fixed height content */}
       <div>

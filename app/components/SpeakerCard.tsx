@@ -67,6 +67,7 @@ export default function SpeakerCard({
             <button
               onClick={() => setExpanded(!expanded)}
               className="mt-2 sm:mt-3 text-xs sm:text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium min-h-[44px] flex items-center transition-colors duration-200"
+              aria-expanded={expanded}
             >
               {expanded ? "Hide talks" : "Show talks"}
             </button>
@@ -82,6 +83,12 @@ export default function SpeakerCard({
                 key={session.id}
                 className="p-2.5 sm:p-3 bg-gray-50 dark:bg-dark-hover rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-dark-border transition-colors duration-200 border border-gray-100 dark:border-dark-border"
                 onClick={() => onSessionClick?.(session)}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    onSessionClick?.(session);
+                  }
+                }}
               >
                 <h4 className="font-medium text-gray-900 dark:text-dark-text-primary text-xs sm:text-sm mb-1">
                   {session.title}

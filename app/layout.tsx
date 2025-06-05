@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { Toaster } from "react-hot-toast";
+import AccessibilityAudit from "./components/AccessibilityAudit";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -88,6 +89,7 @@ export default function RootLayout({
           <Toaster position="bottom-right" />
           <Suspense fallback={null}>{children}</Suspense>
           <Analytics />
+          <AccessibilityAudit />
         </BookmarksAndStarsProvider>
       </body>
     </html>
