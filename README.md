@@ -84,6 +84,16 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
 
+## Running Tests
+
+This project uses [Jest](https://jestjs.io/) for testing. To run the test suite, use the following command:
+
+```bash
+pnpm test
+```
+
+This will execute all unit and integration tests, providing a summary of test outcomes and coverage.
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
